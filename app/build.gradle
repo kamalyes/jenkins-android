@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply from: "$project.rootDir/script/git-version.gradle"
 
 //获取时间戳
 def getDate() {
@@ -37,13 +38,13 @@ android {
         applicationId "io.github.kamalyes.crashcanary"
         minSdkVersion 16
         targetSdkVersion 31
-        versionCode VERSION_CODE
-        versionName APP_VERSION
         resValue("string", 'app_version', APP_VERSION)
         buildConfigField "boolean", "LEO_DEBUG", "true"
         buildConfigField 'String', 'API_SERVER_URL', RELEASE_API_SERVER_URL
         buildConfigField 'String', 'API_SERVER_URL_MALL', RELEASE_API_SERVER_URL_MALL
         generatedDensities = []
+        versionCode gitVersionCodeTime
+        versionName gitVersionName
         signingConfig signingConfigs.signingConfig
     }
 
