@@ -91,8 +91,8 @@ android {
 
     //渠道Flavors，我这里写了一些常用的
     productFlavors {
-        market360 {
-            manifestPlaceholders = [UMENG_CHANNEL: "market360"]
+        huawei {
+            manifestPlaceholders = [UMENG_CHANNEL: "huawei"]
         }
         xiaomi {
             manifestPlaceholders = [UMENG_CHANNEL: "xiaomi"]
@@ -103,8 +103,14 @@ android {
         yingyongbao {
             manifestPlaceholders = [UMENG_CHANNEL: "yingyongbao"]
         }
-        huaweimarket {
-            manifestPlaceholders = [UMENG_CHANNEL: "huaweimarket"]
+        oppo {
+            manifestPlaceholders = [UMENG_CHANNEL: "oppo"]
+        }
+        vivo {
+            manifestPlaceholders = [UMENG_CHANNEL: "vivo"]
+        }
+        meizu {
+            manifestPlaceholders = [UMENG_CHANNEL: "meizu"]
         }
     }
 
