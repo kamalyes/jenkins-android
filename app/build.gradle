@@ -1,0 +1,147 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+//获取时间戳
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyyMMddHHmm')
+    return formattedDate
+}
+
+//def VERSION_CODE = 15
+//def APP_VERSION = '1.0'
+
+android {
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    compileSdkVersion 31
+    signingConfigs {
+        signingConfig {
+            keyAlias 'kamalyes'
+            keyPassword '1235678'
+            storeFile file('../debug.keystore')
+            storePassword '1235678'
+        }
+    }
+
+    defaultConfig {
+        applicationId "io.github.kamalyes.crashcanary"
+        minSdkVersion 16
+        targetSdkVersion 31
+        versionCode VERSION_CODE
+        versionName APP_VERSION
+        resValue("string", 'app_version', APP_VERSION)
+        buildConfigField "boolean", "LEO_DEBUG", "true"
+        buildConfigField 'String', 'API_SERVER_URL', RELEASE_API_SERVER_URL
+        buildConfigField 'String', 'API_SERVER_URL_MALL', RELEASE_API_SERVER_URL_MALL
+        generatedDensities = []
+        signingConfig signingConfigs.signingConfig
+    }
+
+    buildTypes {
+        release {
+            buildConfigField 'String', 'API_SERVER_URL', RELEASE_API_SERVER_URL
+            buildConfigField 'String', 'API_SERVER_URL_MALL', RELEASE_API_SERVER_URL_MALL
+            buildConfigField 'String', 'IM_SERVER_HOST', RELEASE_IM_SERVER_HOST
+            buildConfigField 'int', 'IM_SERVER_PORT', RELEASE_IM_SERVER_PORT
+            buildConfigField "boolean", "LEO_DEBUG", RELEASE_LEO_DEBUG
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        develop {
+            buildConfigField 'String', 'API_SERVER_URL', DEVELOP_API_SERVER_URL
+            buildConfigField 'String', 'API_SERVER_URL_MALL', DEVELOP_API_SERVER_URL_MALL
+            buildConfigField 'String', 'IM_SERVER_HOST', DEVELOP_IM_SERVER_HOST
+            buildConfigField 'int', 'IM_SERVER_PORT', DEVELOP_IM_SERVER_PORT
+            buildConfigField "boolean", "LEO_DEBUG", DEVELOP_LEO_DEBUG
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    dexOptions {
+        javaMaxHeapSize "2g"
+    }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LGPL2.1'
+    }
+
+    //渠道Flavors，我这里写了一些常用的
+    productFlavors {
+        market360 {
+            manifestPlaceholders = [UMENG_CHANNEL: "market360"]
+        }
+        xiaomi {
+            manifestPlaceholders = [UMENG_CHANNEL: "xiaomi"]
+        }
+        wandoujia {
+            manifestPlaceholders = [UMENG_CHANNEL: "wandoujia"]
+        }
+        yingyongbao {
+            manifestPlaceholders = [UMENG_CHANNEL: "yingyongbao"]
+        }
+        huaweimarket {
+            manifestPlaceholders = [UMENG_CHANNEL: "huaweimarket"]
+        }
+    }
+
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [UMENG_CHANNEL: name]
+    }
+
+    //修改生成的apk名字
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def newName
+            def timeNow
+            def oldFile = output.outputFile
+            def outDirectory = oldFile
+            if ("true".equals(IS_JENKINS)) {
+                timeNow = JENKINS_TIME
+                outDirectory = './output/apk'
+                newName = 'android-v' + APP_VERSION + '-' + variant.productFlavors[0].name + timeNow + '-' + variant.buildType.name + '.apk'
+            } else {
+                timeNow = getDate()
+                if (variant.buildType.name.equals('debug')) {
+                    newName = "android-v${APP_VERSION}-debug.apk"
+                } else {
+                    newName = 'android-v' + APP_VERSION + '-' + variant.productFlavors[0].name + timeNow + '-' + variant.buildType.name + '.apk'
+                }
+            }
+            output.outputFile = new File(outDirectory, newName)
+        }
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.3.2'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    debugImplementation project(path: ':lib')
+//    compile fileTree(include: ['*.jar'], dir: 'libs')
+//    debugImplementation 'com.github.kamalyes:crashcanary:1.0.6'
+}
